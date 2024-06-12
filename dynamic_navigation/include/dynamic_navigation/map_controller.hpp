@@ -20,33 +20,35 @@
 #include "nav_msgs/srv/get_map.hpp"
 #include "dynamic_navigation_interfaces/srv/clean_map.hpp"
 
-namespace dynamic_navigation {
+namespace dynamic_navigation
+{
 
-class MapController : public rclcpp::Node {
+class MapController : public rclcpp::Node
+{
 public:
-    MapController();
+  MapController();
 
-    bool cleanMapCallback(
-        const std::shared_ptr<dynamic_navigation_interfaces::srv::CleanMap::Request> request,
-        std::shared_ptr<dynamic_navigation_interfaces::srv::CleanMap::Response> response);
-    void step();
-	  nav_msgs::msg::OccupancyGrid getMap(const std::string srv_name);
+  bool cleanMapCallback(
+    const std::shared_ptr<dynamic_navigation_interfaces::srv::CleanMap::Request> request,
+    std::shared_ptr<dynamic_navigation_interfaces::srv::CleanMap::Response> response);
+  void step();
+  nav_msgs::msg::OccupancyGrid getMap(const std::string srv_name);
 
 private:
-    rclcpp::Subscription<nav_msgs::msg::OccupancyGrid>::SharedPtr shortTermMap_sub;
-    rclcpp::Publisher<nav_msgs::msg::OccupancyGrid>::SharedPtr longTermMap_pub;
-    rclcpp::Publisher<nav_msgs::msg::OccupancyGrid>::SharedPtr effectiveMap_pub;
-    nav_msgs::msg::OccupancyGrid::SharedPtr static_map, shortTerm_map, longTerm_map, effective_map;
-    std::string static_map_srv_name, longterm_map_srv_name;
-    bool map_ready;
-    int longterm_cost_dec;
+  rclcpp::Subscription<nav_msgs::msg::OccupancyGrid>::SharedPtr shortTermMap_sub;
+  rclcpp::Publisher<nav_msgs::msg::OccupancyGrid>::SharedPtr longTermMap_pub;
+  rclcpp::Publisher<nav_msgs::msg::OccupancyGrid>::SharedPtr effectiveMap_pub;
+  nav_msgs::msg::OccupancyGrid::SharedPtr static_map, shortTerm_map, longTerm_map, effective_map;
+  std::string static_map_srv_name, longterm_map_srv_name;
+  bool map_ready;
+  int longterm_cost_dec;
 
-    void shortTermMapCallback(const nav_msgs::msg::OccupancyGrid::SharedPtr short_map);
-    void updateLongTermMap(const nav_msgs::msg::OccupancyGrid::SharedPtr e_map);
-    void buildEffectiveMap(
-        const nav_msgs::msg::OccupancyGrid::SharedPtr s_map,
-        const nav_msgs::msg::OccupancyGrid::SharedPtr l_map);
-    void publishAll();
+  void shortTermMapCallback(const nav_msgs::msg::OccupancyGrid::SharedPtr short_map);
+  void updateLongTermMap(const nav_msgs::msg::OccupancyGrid::SharedPtr e_map);
+  void buildEffectiveMap(
+    const nav_msgs::msg::OccupancyGrid::SharedPtr s_map,
+    const nav_msgs::msg::OccupancyGrid::SharedPtr l_map);
+  void publishAll();
 };
 
 }  // namespace dynamic_navigation

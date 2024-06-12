@@ -48,59 +48,67 @@
 #include "dynamic_navigation_interfaces/srv/metadata.hpp"
 
 namespace dynamic_navigation
-
 {
 
-class ObstacleDetector : public rclcpp_lifecycle::LifecycleNode {
+class ObstacleDetector : public rclcpp_lifecycle::LifecycleNode
+{
 public:
-    ObstacleDetector();
-    ~ObstacleDetector();
+  ObstacleDetector();
+  ~ObstacleDetector();
 
-    void laserCallback(const sensor_msgs::msg::LaserScan::SharedPtr scan_in);
-    void posCallback(const geometry_msgs::msg::PoseWithCovarianceStamped::SharedPtr pos);
-    void step();
+  void laserCallback(const sensor_msgs::msg::LaserScan::SharedPtr scan_in);
+  void posCallback(const geometry_msgs::msg::PoseWithCovarianceStamped::SharedPtr pos);
+  void step();
 
 private:
-    rclcpp::Subscription<sensor_msgs::msg::LaserScan>::SharedPtr scan_sub_;
-    rclcpp::Subscription<geometry_msgs::msg::PoseWithCovarianceStamped>::SharedPtr pos_sub_;
-    rclcpp::Publisher<nav_msgs::msg::OccupancyGrid>::SharedPtr costmap_pub_;
-    nav2_costmap_2d::Costmap2D cost_map_;
-    float posRobot_x_, posRobot_y_, posRobot_w_, max_lenght_, min_lenght_;
-    int cost_inc_, cost_dec_;
-    bool pos_ready_, scan_ready_;
-    unsigned int cells_size_x_, cells_size_y_;
-    double resolution_, origin_x_, origin_y_;
-    unsigned char default_value_;
-    nav2_costmap_2d::Costmap2DPublisher cost_map_publisher_;
+  rclcpp::Subscription<sensor_msgs::msg::LaserScan>::SharedPtr scan_sub_;
+  rclcpp::Subscription<geometry_msgs::msg::PoseWithCovarianceStamped>::SharedPtr pos_sub_;
+  rclcpp::Publisher<nav_msgs::msg::OccupancyGrid>::SharedPtr costmap_pub_;
+  nav2_costmap_2d::Costmap2D cost_map_;
+  float posRobot_x_, posRobot_y_, posRobot_w_, max_lenght_, min_lenght_;
+  int cost_inc_, cost_dec_;
+  bool pos_ready_, scan_ready_;
+  unsigned int cells_size_x_, cells_size_y_;
+  double resolution_, origin_x_, origin_y_;
+  unsigned char default_value_;
+  nav2_costmap_2d::Costmap2DPublisher cost_map_publisher_;
 
-    std::string baseFrameId_, laser_topic_, srv_name_;
-    rclcpp::Time last_exec_inc_, last_exec_dec_;
-    std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
-    std::shared_ptr<tf2_ros::TransformListener> tf_listener_;
-    
-    nav_msgs::msg::MapMetaData metadata_;
-    std::shared_ptr<tf2_ros::MessageFilter<sensor_msgs::msg::LaserScan>> tfScanSub_;
-    message_filters::Subscriber<sensor_msgs::msg::LaserScan> scanSub_;
-    std::list<geometry_msgs::msg::TransformStamped> point_list_;
-    std::list<std::vector<unsigned int>> p_vector_list_;
+  std::string baseFrameId_, laser_topic_, srv_name_;
+  rclcpp::Time last_exec_inc_, last_exec_dec_;
+  std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
+  std::shared_ptr<tf2_ros::TransformListener> tf_listener_;
 
-    rclcpp::Node::SharedPtr node_;
-    std::shared_ptr<rclcpp::executors::SingleThreadedExecutor> executor_;
-    std::thread thread_;
+  nav_msgs::msg::MapMetaData metadata_;
+  std::shared_ptr<tf2_ros::MessageFilter<sensor_msgs::msg::LaserScan>> tfScanSub_;
+  message_filters::Subscriber<sensor_msgs::msg::LaserScan> scanSub_;
+  std::list<geometry_msgs::msg::TransformStamped> point_list_;
+  std::list<std::vector<unsigned int>> p_vector_list_;
 
-    nav_msgs::msg::MapMetaData getMetadata();
-    int getQuadrant(tf2::Transform p, tf2::Transform p_robot);
-    void decrementCost(unsigned int cells_x, unsigned int cells_y);
-    void setDecrementCost1Q(unsigned int point_A_x, unsigned int point_A_y, unsigned int point_B_x, unsigned int point_B_y, int mod_x, int mod_y);
-    void setDecrementCost2Q(unsigned int point_A_x, unsigned int point_A_y, unsigned int point_B_x, unsigned int point_B_y, int mod_x, int mod_y);
-    void setDecrementCost3Q(unsigned int point_A_x, unsigned int point_A_y, unsigned int point_B_x, unsigned int point_B_y, int mod_x, int mod_y);
-    void setDecrementCost4Q(unsigned int point_A_x, unsigned int point_A_y, unsigned int point_B_x, unsigned int point_B_y, int mod_x, int mod_y);
-    void cleanCostMap(int quadrant, tf2::Transform p, tf2::Transform p_robot);
-    unsigned int distance2cell(float n);
-    bool cellsOK(unsigned int x, unsigned int y);
-    void incrementCostProcedure();
-    void decrementCostProcedure();
-    void updateCostmap();
+  rclcpp::Node::SharedPtr node_;
+  std::shared_ptr<rclcpp::executors::SingleThreadedExecutor> executor_;
+  std::thread thread_;
+
+  nav_msgs::msg::MapMetaData getMetadata();
+  int getQuadrant(tf2::Transform p, tf2::Transform p_robot);
+  void decrementCost(unsigned int cells_x, unsigned int cells_y);
+  void setDecrementCost1Q(
+    unsigned int point_A_x, unsigned int point_A_y, unsigned int point_B_x,
+    unsigned int point_B_y, int mod_x, int mod_y);
+  void setDecrementCost2Q(
+    unsigned int point_A_x, unsigned int point_A_y, unsigned int point_B_x,
+    unsigned int point_B_y, int mod_x, int mod_y);
+  void setDecrementCost3Q(
+    unsigned int point_A_x, unsigned int point_A_y, unsigned int point_B_x,
+    unsigned int point_B_y, int mod_x, int mod_y);
+  void setDecrementCost4Q(
+    unsigned int point_A_x, unsigned int point_A_y, unsigned int point_B_x,
+    unsigned int point_B_y, int mod_x, int mod_y);
+  void cleanCostMap(int quadrant, tf2::Transform p, tf2::Transform p_robot);
+  unsigned int distance2cell(float n);
+  bool cellsOK(unsigned int x, unsigned int y);
+  void incrementCostProcedure();
+  void decrementCostProcedure();
+  void updateCostmap();
 };
 
 }  // namespace dynamic_navigation

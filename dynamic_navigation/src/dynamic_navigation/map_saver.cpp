@@ -157,7 +157,7 @@ void MapSaver::saveMapCallback(
 void MapSaver::saveMapPeriodically()
 {
   nav2_map_server::SaveParameters save_parameters;
-  save_parameters.map_file_name = std::string(map_path_ + "lab_long"); 
+  save_parameters.map_file_name = std::string(map_path_ + "lab_long");
   save_parameters.image_format = "pgm";
   save_parameters.free_thresh = free_thresh_default_;
   save_parameters.occupied_thresh = occupied_thresh_default_;
