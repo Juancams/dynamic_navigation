@@ -54,6 +54,7 @@ namespace dynamic_navigation
 class ObstacleDetector : public rclcpp_lifecycle::LifecycleNode {
 public:
     ObstacleDetector();
+    ~ObstacleDetector();
 
     void laserCallback(const sensor_msgs::msg::LaserScan::SharedPtr scan_in);
     void posCallback(const geometry_msgs::msg::PoseWithCovarianceStamped::SharedPtr pos);
@@ -79,9 +80,13 @@ private:
     
     nav_msgs::msg::MapMetaData metadata_;
     std::shared_ptr<tf2_ros::MessageFilter<sensor_msgs::msg::LaserScan>> tfScanSub_;
-    std::shared_ptr<message_filters::Subscriber<sensor_msgs::msg::LaserScan>> scanSub_;
+    message_filters::Subscriber<sensor_msgs::msg::LaserScan> scanSub_;
     std::list<geometry_msgs::msg::TransformStamped> point_list_;
     std::list<std::vector<unsigned int>> p_vector_list_;
+
+    rclcpp::Node::SharedPtr node_;
+    std::shared_ptr<rclcpp::executors::SingleThreadedExecutor> executor_;
+    std::thread thread_;
 
     nav_msgs::msg::MapMetaData getMetadata();
     int getQuadrant(tf2::Transform p, tf2::Transform p_robot);

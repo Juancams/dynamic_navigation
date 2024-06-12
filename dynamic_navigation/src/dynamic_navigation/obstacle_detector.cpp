@@ -30,16 +30,17 @@ namespace dynamic_navigation
     tf_buffer_(std::make_shared<tf2_ros::Buffer>(this->get_clock())),
     tf_listener_(std::make_shared<tf2_ros::TransformListener>(*tf_buffer_)) 
   {	
-    // scanSub_ = std::make_shared<message_filters::Subscriber<sensor_msgs::msg::LaserScan>>(this->get_node_base_interface(), laser_topic_, 5);
+		node_ = rclcpp::Node::make_shared("subnode");
+		std::chrono::duration<int> buffer_timeout(1);
+    scanSub_.subscribe(node_, laser_topic_);
 
     pos_sub_ = this->create_subscription<geometry_msgs::msg::PoseWithCovarianceStamped>(
         "/amcl_pose", 5, std::bind(&ObstacleDetector::posCallback, this, std::placeholders::_1));
 
-    // tfScanSub_ = std::make_shared<tf2_ros::MessageFilter<sensor_msgs::msg::LaserScan>>(
-    //     *scanSub_, tf_listener_, baseFrameId_, 5, this->get_node_logging_interface(), this->get_node_clock_interface());
+    tfScanSub_ = std::make_shared<tf2_ros::MessageFilter<sensor_msgs::msg::LaserScan>>(
+        scanSub_, *tf_buffer_, baseFrameId_, 100, node_->get_node_logging_interface(), node_->get_node_clock_interface(), buffer_timeout);
 
-    // tfScanSub_->registerCallback(std::bind(&ObstacleDetector::laserCallback, this, std::placeholders::_1));
-  
+		tfScanSub_->registerCallback(&ObstacleDetector::laserCallback, this);
 
 		metadata_ = getMetadata();
 
@@ -59,7 +60,20 @@ namespace dynamic_navigation
 		this->declare_parameter("cost_dec", cost_dec_);
 		this->declare_parameter("min_lenght", min_lenght_);
 		this->declare_parameter("max_lenght", max_lenght_);
+
+		executor_ = std::make_shared<rclcpp::executors::SingleThreadedExecutor>();
+        executor_->add_node(node_);
+        thread_ = std::thread([this]() {
+            executor_->spin();
+        });
 	}
+
+	ObstacleDetector::~ObstacleDetector() {
+        executor_->cancel();
+        if (thread_.joinable()) {
+            thread_.join();
+        }
+    }
 
 	void ObstacleDetector::laserCallback(const sensor_msgs::msg::LaserScan::SharedPtr scan_in) {
 		float o_t_min, o_t_max, o_t_inc;
